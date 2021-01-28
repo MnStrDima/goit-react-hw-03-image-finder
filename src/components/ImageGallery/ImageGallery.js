@@ -1,27 +1,24 @@
 import { Component } from 'react';
+import PropTypes from 'prop-types';
 import styles from './ImageGallery.module.css';
 import ImageGalleryItem from '../ImageGalleryItem/ImageGalleryItem';
 
 export default class ImageGallery extends Component {
-  state = {
-    imageList: [],
-  };
-  componentDidUpdate(prevProps, prevState) {
-    const prevList = prevState.imageList;
-    const nextList = this.props.imageList;
-    if (prevList !== nextList) {
-      this.setState({ imageList: this.props.imageList });
-    }
-  }
+  static propTypes = PropTypes.shape({
+    imageList: PropTypes.array.isRequired,
+    onClick: PropTypes.func.isRequired,
+  }).isRequired;
+
   render() {
+    const { onClick, imageList } = this.props;
     return (
-      <ul className="ImageGallery" onClick={this.props.onClick}>
-        {this.state.imageList.map(image => (
+      <ul className={styles.ImageGallery} onClick={onClick}>
+        {imageList.map(({ webformatURL, type, largeImageURL }, index) => (
           <ImageGalleryItem
-            key={image.id}
-            src={image.webformatURL}
-            alt={image.type}
-            largeImageUrl={image.largeImageURL}
+            key={index}
+            src={webformatURL}
+            alt={type}
+            largeImageUrl={largeImageURL}
           />
         ))}
       </ul>

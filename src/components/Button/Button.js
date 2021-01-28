@@ -1,10 +1,11 @@
+import PropTypes from 'prop-types';
 import styles from './Button.module.css';
 
 export default function Button({ onClick }) {
   return (
     <button
       type="button"
-      className="Button"
+      className={styles.Button}
       onClick={() => {
         onClick();
       }}
@@ -13,7 +14,7 @@ export default function Button({ onClick }) {
     </button>
   );
 }
-// window.scrollTo({
-//   top: document.documentElement.scrollHeight,
-//   behavior: 'smooth',
-// });
+
+Button.propTypes = {
+  onClick: PropTypes.func.isRequired,
+};

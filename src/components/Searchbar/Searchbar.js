@@ -1,10 +1,15 @@
 import { Component } from 'react';
 import { ImSearch } from 'react-icons/im';
 import { toast } from 'react-toastify';
+import PropTypes from 'prop-types';
 
 import styles from './Searchbar.module.css';
 
 export default class Searchbar extends Component {
+  static propTypes = {
+    onSubmit: PropTypes.func.isRequired,
+  };
+
   state = {
     initialValue: '',
   };
@@ -15,32 +20,35 @@ export default class Searchbar extends Component {
 
   handleSubmit = e => {
     e.preventDefault();
-    if (this.state.initialValue.trim() === '') {
+    const { initialValue } = this.state;
+    const { onSubmit } = this.props;
+    if (initialValue.trim() === '') {
       toast.error('Please enter your query.');
       return;
     }
-    this.props.onSubmit(this.state.initialValue.trim());
+    onSubmit(initialValue.trim());
     this.setState({ initialValue: '' });
   };
 
   render() {
+    const { initialValue } = this.state;
     return (
-      <header className="Searchbar">
-        <form className="SearchForm" onSubmit={this.handleSubmit}>
-          <button type="submit" className="SearchForm-button">
-            <span className="SearchForm-button-label">
+      <header className={styles.Searchbar}>
+        <form className={styles.SearchForm} onSubmit={this.handleSubmit}>
+          <button type="submit" className={styles.SearchFormButton}>
+            <span className={styles.SearchFormButtonLabel}>
               <ImSearch />
               Search
             </span>
           </button>
 
           <input
-            className="SearchForm-input"
+            className={styles.SearchFormInput}
             type="text"
             autoComplete="off"
             autoFocus
             placeholder="Search images and photos"
-            value={this.state.initialValue}
+            value={initialValue}
             onChange={this.handleInputChange}
           />
         </form>

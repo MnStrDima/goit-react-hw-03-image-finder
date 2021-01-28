@@ -19,11 +19,10 @@ export default class App extends Component {
     searchQuery: '',
     page: 1,
     imageList: [],
-    error: null,
+    error: '',
     status: Status.IDLE,
     showModal: false,
-    largeImageUrl: '',
-    alt: '',
+    currentImgObj: { largeUrl: '', alt: '' },
   };
 
   componentDidUpdate(prevProps, prevState) {
@@ -31,28 +30,11 @@ export default class App extends Component {
     const nextQuery = this.state.searchQuery;
 
     if (prevQuery !== nextQuery) {
-      this.setState({ status: Status.PENDING });
-      console.log(this.state.status);
-      fetchImages(nextQuery, this.state.page)
-        .then(data => {
-          if (data.hits.length === 0) {
-            return toast.error('Unfortunately, there is nothing to show...');
-          }
-          this.setState({
-            imageList: [...data.hits],
-            status: Status.RESOLVED,
-          });
-          console.log(this.state.imageList);
-        })
-        .catch(error => this.setState({ error, status: Status.REJECTED }))
-        .finally(() => {
-          window.scrollTo({
-            top: document.documentElement.scrollHeight,
-            behavior: 'smooth',
-          });
-          console.log(this.state.status);
-          this.setState(prevState => ({ page: (prevState.page += 1) }));
-        });
+      this.setState({
+        imageList: [],
+        status: Status.PENDING,
+      });
+      this.fetchProcessing(nextQuery);
     }
   }
 
@@ -62,28 +44,32 @@ export default class App extends Component {
   };
 
   handleButtonClick = () => {
-    console.log(this.state.page);
+    const nextQuery = this.state.searchQuery;
     this.setState({ status: Status.PENDING });
-    console.log(this.state.status);
-    fetchImages(this.state.searchQuery, this.state.page)
+    this.fetchProcessing(nextQuery);
+  };
+
+  fetchProcessing = nextQuery => {
+    fetchImages(nextQuery, this.state.page)
       .then(data => {
         if (data.hits.length === 0) {
+          this.setState({ status: Status.IDLE });
           return toast.error('Unfortunately, there is nothing to show...');
         }
         this.setState(prevState => ({
           imageList: [...prevState.imageList, ...data.hits],
           status: Status.RESOLVED,
         }));
-        console.log(this.state.imageList);
       })
-      .catch(error => this.setState({ error, status: Status.REJECTED }))
+      .catch(({ message }) =>
+        this.setState({ error: message, status: Status.REJECTED }),
+      )
       .finally(() => {
         window.scrollTo({
           top: document.documentElement.scrollHeight,
           behavior: 'smooth',
         });
         this.setState(prevState => ({ page: (prevState.page += 1) }));
-        console.log(this.state.status);
       });
   };
 
@@ -92,45 +78,43 @@ export default class App extends Component {
   };
 
   toggleModal = () => {
-    this.setState(({ showModal }) => ({ showModal: !showModal }));
+    this.setState(({ showModal }) => ({
+      showModal: !showModal,
+    }));
   };
 
   handleGalleryItemClick = e => {
+    const largeUrl = e.target.dataset.largeUrl;
+    const alt = e.target.alt;
     if (e.target.nodeName === 'IMG') {
-      this.setState({
-        largeImageUrl: e.target.dataset.largeUrl,
-        alt: e.target.alt,
-      });
+      this.setState({ currentImgObj: { largeUrl, alt } });
     }
     this.toggleModal();
   };
 
   render() {
+    const { imageList, error, status, showModal, currentImgObj } = this.state;
     return (
       <>
         <Searchbar onSubmit={this.handleFormSubmit} />
-        {this.state.error && <h1>{this.state.error.message}</h1>}
+        {error && <h1>{error}</h1>}
         <ImageGallery
-          imageList={this.state.imageList}
+          imageList={imageList}
           onClick={this.handleGalleryItemClick}
         />
-        {this.state.showModal && (
+        {showModal && (
           <Modal
-            src={this.state.largeImageUrl}
-            alt={this.state.alt}
+            src={currentImgObj.largeUrl}
+            alt={currentImgObj.alt}
             onClose={this.toggleModal}
-          />
+          ></Modal>
         )}
-        {this.state.status === Status.PENDING && (
-          <Loader
-            type="ThreeDots"
-            color="#00BFFF"
-            height={100}
-            width={100}
-            timeout={3000}
-          />
+        {status === Status.PENDING && (
+          <Modal>
+            <Loader type="Watch" color="#00BFFF" height={300} width={300} />
+          </Modal>
         )}
-        {this.state.status === Status.RESOLVED && (
+        {status === Status.RESOLVED && (
           <Button onClick={this.handleButtonClick} />
         )}
 
