@@ -109,14 +109,20 @@ export default class App extends Component {
             onClose={this.toggleModal}
           ></Modal>
         )}
-        {status === Status.PENDING && (
-          <Modal>
-            <Loader type="Watch" color="#00BFFF" height={300} width={300} />
-          </Modal>
-        )}
-        {status === Status.RESOLVED && (
-          <Button onClick={this.handleButtonClick} />
-        )}
+        <div className="container">
+          {status === Status.PENDING && (
+            <Loader
+              className="loader"
+              type="ThreeDots"
+              color="#3f51b5"
+              height={100}
+              width={100}
+            />
+          )}
+          {status === Status.RESOLVED && (
+            <Button onClick={this.handleButtonClick} />
+          )}
+        </div>
 
         <ToastContainer autoClose={2000} />
       </>

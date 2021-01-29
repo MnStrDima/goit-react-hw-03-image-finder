@@ -35,3 +35,9 @@ img {
   grid-gap: 16px;
   padding-bottom: 24px;
 }
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

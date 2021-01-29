@@ -1,6 +1,7 @@
 import { createPortal } from 'react-dom';
 import { Component } from 'react';
 import PropTypes from 'prop-types';
+import Loader from 'react-loader-spinner';
 
 import styles from './Modal.module.css';
 const modalRoot = document.querySelector('#modal-root');
@@ -13,6 +14,10 @@ export default class Modal extends Component {
     children: PropTypes.element,
   }).isRequired;
 
+  state = {
+    isImageLoading: true,
+  };
+
   componentDidMount() {
     window.addEventListener('keydown', this.handleKeyDown);
   }
@@ -24,13 +29,19 @@ export default class Modal extends Component {
   handleKeyDown = e => {
     if (e.code === 'Escape') {
       this.props.onClose();
+      this.setState({ isImageLoading: true });
     }
   };
 
   handleBackdropClick = e => {
     if (e.currentTarget === e.target) {
       this.props.onClose();
+      this.setState({ isImageLoading: true });
     }
+  };
+
+  onImageLoad = () => {
+    this.setState({ isImageLoading: false });
   };
 
   render() {
@@ -38,7 +49,17 @@ export default class Modal extends Component {
     return createPortal(
       <div className={styles.Overlay} onClick={this.handleBackdropClick}>
         <div className={styles.Modal}>
-          <img src={src} alt={alt} />
+          {this.state.isImageLoading && (
+            <Loader
+              className="loader"
+              type="ThreeDots"
+              color="#3f51b5"
+              height={100}
+              width={100}
+            />
+          )}
+          <img src={src} alt={alt} onLoad={this.onImageLoad} />
+
           {this.props.children}
         </div>
       </div>,
